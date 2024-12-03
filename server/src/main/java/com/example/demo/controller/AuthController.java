@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.LoginRequestDto;
-import com.example.demo.dto.ResponseDto;
+import com.example.demo.dto.JwtResponseDto;
 import com.example.demo.dto.SignupRequestDto;
 import com.example.demo.entity.User;
 import com.example.demo.service.AuthService;
@@ -29,9 +29,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<JwtResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         
-        ResponseDto response = authService.authenticateUser(loginRequestDto);
+        JwtResponseDto response = authService.authenticateUser(loginRequestDto);
         return ResponseEntity.ok(response);
     }
     

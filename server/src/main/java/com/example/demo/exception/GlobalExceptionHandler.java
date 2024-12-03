@@ -108,6 +108,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<Object> handleNotFound(ResourceNotFoundException ex,WebRequest request) {
+        final String error = "No Resource found " + ex.getMessage();
+		final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+
     // 405
 
     @Override

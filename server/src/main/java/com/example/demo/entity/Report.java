@@ -8,8 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,27 +20,27 @@ public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "report_date", nullable = false)
     private LocalDate reportDate;
 
     @Column(name = "total_calories", nullable = false)
-    private Integer totalCalories;
+    private double totalCalories;
 
     @Column(name = "total_protein", nullable = false)
-    private Integer totalProtein;
+    private double  totalProtein;
 
     @Column(name = "total_carbs", nullable = false)
-    private Integer totalCarbs;
+    private double totalCarbs;
 
     @Column(name = "total_fat", nullable = false)
-    private Integer totalFat;
+    private double totalFat;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
 }

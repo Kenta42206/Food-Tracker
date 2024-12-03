@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -21,20 +22,33 @@ public class Mealhistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @ManyToOne
     @JoinColumn(name = "food_id", nullable = false)
     private Food food;
 
     @Column(nullable = false)
-    private Integer quantity; 
+    private int quantity; 
 
     @Column(name = "consumed_at", nullable = false)
-    private LocalDateTime consumedAt = LocalDateTime.now();
+    private LocalDate consumedAt = LocalDate.now();
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    public Mealhistory(){}
+    
+    public Mealhistory(Long userId, Food food, int quantity){
+        this.userId = userId;
+        this.food = food;
+        this.quantity = quantity;
+    }
 
 }

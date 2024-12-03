@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.LoginRequestDto;
-import com.example.demo.dto.ResponseDto;
+import com.example.demo.dto.JwtResponseDto;
 import com.example.demo.dto.SignupRequestDto;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
@@ -54,7 +54,7 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public ResponseDto authenticateUser(LoginRequestDto loginRequestDto){
+    public JwtResponseDto authenticateUser(LoginRequestDto loginRequestDto){
         try {
             Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -65,7 +65,7 @@ public class AuthService {
             String jwt = jwtTokenProvider.generateToken(auth);
             System.out.println(jwt);
 
-            ResponseDto response = new ResponseDto();
+            JwtResponseDto response = new JwtResponseDto();
             response.setToken(jwt);
             response.setExpiresIn(jwtTokenProvider.getExpirationMs());
             return response;

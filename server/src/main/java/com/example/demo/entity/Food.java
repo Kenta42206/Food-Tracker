@@ -19,22 +19,22 @@ public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false)
-    private Integer protain;
+    private double protein;
 
     @Column(nullable = false)
-    private Integer fat;
+    private double fat;
 
     @Column(nullable = false)
-    private Integer carbs;
+    private double carbs;
 
     @Column(nullable = false)
-    private Integer calories;
+    private double calories;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
