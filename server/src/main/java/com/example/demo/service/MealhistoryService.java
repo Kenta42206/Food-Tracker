@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -43,11 +44,38 @@ public class MealhistoryService {
             throw new ResourceNotFoundException("Food not found with id {" + foodId + "}");
         });
 
-        try{
-            Mealhistory newMealhistory = mealhistoryRepository.save(new Mealhistory(userId, food, mealhistory.getQuantity()));
-            return newMealhistory;
-        } catch(Exception e){
-            throw e;
+        Mealhistory newMealhistory = mealhistoryRepository.save(new Mealhistory(userId, food, mealhistory.getQuantity()));
+        return newMealhistory;
+    }
+
+    public Mealhistory updateMealhistory(Long id, MealhistoryRequestDto mealhistooryRequestDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+
+        Mealhistory targetMealhistory = mealhistoryRepository.findById(id).orElseThrow(()->{
+            throw new ResourceNotFoundException("Mealhistory not found with id {" + id + "}");
+        });
+
+        if(!Objects.equals(userId, targetMealhistory.getUserId())){
+            throw new ResourceNotFoundException("Mealhistory not found with id {" + id + "} and user id {" + userId + "}");
+        }
+
+        Food food = foodRepository.findById(mealhistooryRequestDto.getFoodId()).orElseThrow(()->{
+            throw new ResourceNotFoundException("Food not found with id {" + mealhistooryRequestDto.getFoodId() + "}");
+        });
+
+        targetMealhistory.setFood(food);
+        targetMealhistory.setQuantity(mealhistooryRequestDto.getQuantity());
+
+        return mealhistoryRepository.save(targetMealhistory);
+    }
+
+    public void deleteMealhistory(Long id) {
+        if (mealhistoryRepository.existsById(id)) {
+            mealhistoryRepository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("Mealhistory not found with id {" + id + "}");
         }
     }
     

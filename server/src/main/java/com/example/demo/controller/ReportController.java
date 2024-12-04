@@ -17,18 +17,18 @@ import com.example.demo.service.ReportService;
 
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/report")
 public class ReportController {
     @Autowired
     ReportService reportService;
 
-    @GetMapping("/report/{date}")
+    @GetMapping("/{date}")
     public ResponseEntity<Report> getMethodName(@PathVariable("date") @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate date) {
         Report report = reportService.getDailyReportByUserIdAndDate(date);
         return new ResponseEntity<>(report, HttpStatus.OK);
     }
 
-    @PutMapping("/report/{date}")
+    @PutMapping("/{date}")
     public ResponseEntity<Report> updateDailyReport(@PathVariable("date") @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate date) {
         Report report = reportService.updateDailyReport(date);
         return new ResponseEntity<>(report, HttpStatus.OK);

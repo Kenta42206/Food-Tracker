@@ -14,4 +14,6 @@ public interface  FoodRepository extends JpaRepository<Food, Integer> {
     Page<Food> findByNameContaining(String name, Pageable pageable);
 
     Optional<Food> findById(Long id);
+
+    boolean existsById(long id);
 }

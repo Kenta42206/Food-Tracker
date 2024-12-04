@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.dto.JwtResponseDto;
+import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.dto.SignupRequestDto;
 import com.example.demo.entity.User;
 import com.example.demo.service.AuthService;
@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     @Autowired
     private AuthService authService;
@@ -34,8 +34,5 @@ public class AuthController {
         JwtResponseDto response = authService.authenticateUser(loginRequestDto);
         return ResponseEntity.ok(response);
     }
-    
-    
-    
-    
+ 
 }

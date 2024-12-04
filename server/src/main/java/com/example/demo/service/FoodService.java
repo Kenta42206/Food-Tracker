@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Food;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.FoodRepository;
 
 @Service
@@ -19,28 +20,33 @@ public class FoodService {
     @Autowired
     FoodRepository foodRepository;
     
-    public Map<String, Object> getFoodsByNameWithPage(String name, int page, int size){
-        try {
-            List<Food> foods = new ArrayList<>();
-            Pageable paging = PageRequest.of(page, size);
-            Page<Food> pageTuts;
+    public Map<String, Object> getFoodsByNameKeywordWithPage(String name, int page, int size){
+        List<Food> foods = new ArrayList<>();
+        Pageable paging = PageRequest.of(page, size);
+        Page<Food> pageTuts;
 
-            if(name == null) {
-                throw new IllegalArgumentException("Food name must not be empty or null");
-            }else{
-                pageTuts = foodRepository.findByNameContaining(name, paging);
-            }
-
-            foods = pageTuts.getContent();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("foods", foods);
-            response.put("currentPage", pageTuts.getNumber());
-            response.put("totalItems", pageTuts.getTotalElements());
-            response.put("totalPages", pageTuts.getTotalPages());
-            return response;
-        } catch (IllegalArgumentException  e) {
-            throw e;
+        if(name == null) {
+            throw new IllegalArgumentException("Food name must not be empty or null");
+        } else {
+            pageTuts = foodRepository.findByNameContaining(name, paging);
         }
+
+        foods = pageTuts.getContent();
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("foods", foods);
+        response.put("currentPage", pageTuts.getNumber());
+        response.put("totalItems", pageTuts.getTotalElements());
+        response.put("totalPages", pageTuts.getTotalPages());
+
+        return response;    
+    }
+
+    public Food getFoodById(Long id) {
+        Food food = foodRepository.findById(id).orElseThrow(()->{
+            throw new ResourceNotFoundException("Food not found with id {" + id + "}");
+        });
+
+        return food;
     }
 }
