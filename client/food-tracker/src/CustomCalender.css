@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* カレンダー全体のスタイル */
+.react-calendar {
+  width: 100% !important;
+  height: 100%;
+  border: none;
+}
+
+.react-calendar__tile:hover {
+  background-color: #dcdcdc;
+}
+
+/* 現在の日付のスタイル */
+.react-calendar__tile--now {
+  background-color: #dcdcdc !important;
+  color: white;
+  font-weight: bold;
+}
+
+/* 選択された日付のスタイル */
+.react-calendar__tile--active {
+  color: white !important;
+}
