@@ -9,9 +9,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.demo.entity.Report;
 
-public interface ReportRepository extends JpaRepository<Report, Integer>{
+public interface ReportRepository extends JpaRepository<Report, Long>{
     @Query("SELECT r FROM Report r WHERE r.userId = :userId AND DATE(r.reportDate) = :reportDate")
     Optional<Report> findByUserIdAndDate(@Param("userId") Long userId, @Param("reportDate") LocalDate reportDate);
 
     Report findByUserIdAndReportDate(Long userId, LocalDate reportDate);
+    boolean existsByUserIdAndReportDate(Long userId, LocalDate reportDate);
 }

@@ -11,11 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.dto.JwtResponseDto;
+import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.dto.SignupRequestDto;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtTokenProvider;
 
@@ -63,11 +64,18 @@ public class AuthService {
             );
             SecurityContextHolder.getContext().setAuthentication(auth);
             String jwt = jwtTokenProvider.generateToken(auth);
-            System.out.println(jwt);
 
             JwtResponseDto response = new JwtResponseDto();
             response.setToken(jwt);
             response.setExpiresIn(jwtTokenProvider.getExpirationMs());
+
+            String usernameFromJwt = jwtTokenProvider.getUsernameFromJwt(jwt);
+
+            User user = userRepository.findByUsername(usernameFromJwt).orElseThrow(()->{
+                throw new ResourceNotFoundException("User not found with username {" + usernameFromJwt + "}");
+            });
+
+            response.setUser(user);
             return response;
 
         } catch (AuthenticationException e) {

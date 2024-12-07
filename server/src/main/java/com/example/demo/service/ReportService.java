@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,40 +29,51 @@ public class ReportService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-        return reportRepository.findByUserIdAndDate(userId, reportDate).orElseGet(()->{
 
-            Report report = new Report();
-            report.setUserId(userId);
-            report.setReportDate(reportDate);
-            report.setTotalCalories(0);
-            report.setTotalProtein(0);
-            report.setTotalCarbs(0);
-            report.setTotalFat(0);
+        if(!reportRepository.existsByUserIdAndReportDate(userId,reportDate)){
+            return reportRepository.findByUserIdAndDate(userId, reportDate).orElseGet(()->{
 
-            return reportRepository.save(report);
+                Report report = new Report();
+                report.setUserId(userId);
+                report.setReportDate(reportDate);
+                report.setTotalCalories(0);
+                report.setTotalProtein(0);
+                report.setTotalCarbs(0);
+                report.setTotalFat(0);
+    
+                return reportRepository.save(report);
+            });
+        } else{
+            Report targetReport = reportRepository.findByUserIdAndDate(userId, reportDate).orElseThrow(()->{
+                throw new ResourceNotFoundException("Report not found with user {" + userId + "} and date {" + reportDate + "}");
+            });
+    
+            return reportRepository.save(calculateDailyReport(targetReport));
         }
-        );
     }
 
     public Report calculateDailyReport(Report report){
         Long userId = report.getUserId();
 
-        List<Mealhistory> mealHistories = mealhistoryRepository.findByUserIdAndDate(userId, report.getReportDate());
+        LocalDateTime startOfDay = report.getReportDate().atStartOfDay();
+        LocalDateTime endOfDay = report.getReportDate().atTime(LocalTime.MAX);
+        List<Mealhistory> mealHistories = mealhistoryRepository.findByUserIdAndDateRange(userId, startOfDay, endOfDay);
 
         if(mealHistories == null || mealHistories.isEmpty()){
             return report;
         }
 
-        double totalCalories = 0;
-        double totalProtein = 0;
-        double totalCarbs = 0;
-        double totalFat = 0;
+        int totalCalories = 0;
+        int totalProtein = 0;
+        int totalCarbs = 0;
+        int totalFat = 0;
 
         for(Mealhistory mealhistory:mealHistories){
-            totalCalories += mealhistory.getQuantity() * mealhistory.getFood().getCalories();
-            totalProtein += mealhistory.getQuantity() * mealhistory.getFood().getProtein();
-            totalCarbs += mealhistory.getQuantity() * mealhistory.getFood().getCarbs();
-            totalFat += mealhistory.getQuantity() * mealhistory.getFood().getFat();
+            totalCalories += mealhistory.getQuantity() * (mealhistory.getFood().getCalories() /100);
+            totalProtein += mealhistory.getQuantity() * (mealhistory.getFood().getProtein() / 100);
+            // (meal.food.protein * (meal.quantity / 100) * 10) / 10
+            totalCarbs += mealhistory.getQuantity() * (mealhistory.getFood().getCarbs() /100);
+            totalFat += mealhistory.getQuantity() * (mealhistory.getFood().getFat() / 100);
         }
 
         report.setTotalCalories(totalCalories);
@@ -69,16 +82,5 @@ public class ReportService {
         report.setTotalFat(totalFat);
 
         return report;
-    }
-
-    public Report updateDailyReport(LocalDate reportDate){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
-        Report targetReport = reportRepository.findByUserIdAndDate(userId, reportDate).orElseThrow(()->{
-            throw new ResourceNotFoundException("Report not found with user {" + userId + "} and date {" + reportDate + "}");
-        });
-
-        return reportRepository.save(calculateDailyReport(targetReport));
     }
 }

@@ -34,6 +34,18 @@ public class User implements UserDetails {
 
     @Column(nullable=false)
     private String password;
+    
+    @Column(name="goal_protein")
+    private int goalProtein;
+
+    @Column(name="goal_carbs")
+    private int goalCarbs;
+
+    @Column(name="goal_fat")
+    private int goalFat;
+
+    @Column(name="goal_calories")
+    private int goalCalories;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

@@ -5,11 +5,8 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
   flyway:
-    user: postgres
-    password: postgres
-    url: jdbc:postgresql://localhost:5432/dev
-    baseline-version: 0
     enabled: true
+    baseline-version: 0
     baseline-on-migrate: true
   jpa:
     hibernate:

@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -34,8 +33,14 @@ public class Mealhistory {
     @Column(nullable = false)
     private int quantity; 
 
+    @Column(name="meal_number", nullable=false)
+    private int mealNumber;
+
     @Column(name = "consumed_at", nullable = false)
-    private LocalDate consumedAt = LocalDate.now();
+    private LocalDateTime consumedAt;
+
+    @Column(name="delete_flg")
+    private boolean deleteFlg;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -45,10 +50,13 @@ public class Mealhistory {
 
     public Mealhistory(){}
     
-    public Mealhistory(Long userId, Food food, int quantity){
+    public Mealhistory(Long userId, Food food, int quantity,int mealNumber, LocalDateTime consumedAt,boolean  deleteFlg){
         this.userId = userId;
         this.food = food;
         this.quantity = quantity;
+        this.mealNumber = mealNumber;
+        this.consumedAt = consumedAt;
+        this.deleteFlg = deleteFlg;
     }
 
 }

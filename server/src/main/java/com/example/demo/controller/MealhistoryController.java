@@ -41,6 +41,13 @@ public class MealhistoryController {
         return new ResponseEntity<>(newMealhistory, HttpStatus.CREATED);
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<Mealhistory>> createMealhistories(@RequestBody List<MealhistoryRequestDto> mealhistoryRequestDto) {
+        List<Mealhistory> savedHistories = mealhistoryService.createMealhistories(mealhistoryRequestDto);
+        return new ResponseEntity<>(savedHistories, HttpStatus.CREATED);
+    }
+    
+
     @PutMapping("/{id}")
     public ResponseEntity<Mealhistory> updateMealhistory(@PathVariable("id") Long id, @RequestBody MealhistoryRequestDto mealhistooryRequestDto) {
         Mealhistory mealhistory = mealhistoryService.updateMealhistory(id,mealhistooryRequestDto);

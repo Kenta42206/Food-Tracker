@@ -1,8 +1,11 @@
 package com.example.demo.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -17,6 +20,8 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.FoodRepository;
 import com.example.demo.repository.MealhistoryRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class MealhistoryService {
     @Autowired
@@ -29,7 +34,10 @@ public class MealhistoryService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-        List<Mealhistory> mealhistoryList = mealhistoryRepository.findByUserIdAndDate(userId, consumedAt);
+
+        LocalDateTime startOfDay = consumedAt.atStartOfDay();
+        LocalDateTime endOfDay = consumedAt.atTime(LocalTime.MAX);
+        List<Mealhistory> mealhistoryList = mealhistoryRepository.findByUserIdAndDateRange(userId, startOfDay, endOfDay);
         return mealhistoryList;
     }
 
@@ -44,8 +52,44 @@ public class MealhistoryService {
             throw new ResourceNotFoundException("Food not found with id {" + foodId + "}");
         });
 
-        Mealhistory newMealhistory = mealhistoryRepository.save(new Mealhistory(userId, food, mealhistory.getQuantity()));
+        Mealhistory newMealhistory = mealhistoryRepository.save(new Mealhistory(userId, food, mealhistory.getQuantity(),mealhistory.getMealNumber(),mealhistory.getConsumedAt(),false));
         return newMealhistory;
+    }
+
+    @Transactional
+    public List<Mealhistory> createMealhistories(List<MealhistoryRequestDto> mealhistories){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+
+        List<Mealhistory> mealhistoriesToSave = mealhistories.stream()
+        .map(mealhistory -> {
+            // IDがある場合は既存のレコードを取得して更新
+            if(mealhistory.getId() == null){
+                return new Mealhistory(
+                    userId,
+                    foodRepository.findById(mealhistory.getFoodId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                            "Food not found with id {" + mealhistory.getFoodId() + "}")),
+                    mealhistory.getQuantity(),
+                    mealhistory.getMealNumber(),
+                    mealhistory.getConsumedAt(),
+                    mealhistory.isDeleteFlg());
+            } else{
+                Mealhistory existingMealhistory = mealhistoryRepository.findById(mealhistory.getId()).orElse(null);
+                existingMealhistory.setFood(foodRepository.findById(mealhistory.getFoodId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "Food not found with id {" + mealhistory.getFoodId() + "}")));
+            existingMealhistory.setQuantity(mealhistory.getQuantity());
+            existingMealhistory.setMealNumber(mealhistory.getMealNumber());
+            existingMealhistory.setConsumedAt(mealhistory.getConsumedAt());
+            existingMealhistory.setDeleteFlg(mealhistory.isDeleteFlg());
+            return existingMealhistory;
+            }
+        })
+        .collect(Collectors.toList());
+
+        return mealhistoryRepository.saveAll(mealhistoriesToSave);
     }
 
     public Mealhistory updateMealhistory(Long id, MealhistoryRequestDto mealhistooryRequestDto) {
