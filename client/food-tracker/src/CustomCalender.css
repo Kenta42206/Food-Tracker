@@ -6,7 +6,7 @@
 .react-calendar {
   width: 100% !important;
   height: 100%;
-  border: none;
+  border: none !important;
 }
 
 .react-calendar__tile:hover {

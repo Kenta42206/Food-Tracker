@@ -12,24 +12,41 @@ import {
 } from "../services/MealService";
 import {
   formatDate,
+  formatDateTimeStringToDateString,
   formatDateTimeToDateString,
   getToday,
 } from "../utils/DateUtil";
 import { getFoodsByKeyword } from "../services/FoodService";
 import { Food } from "../types/Food";
+import { showToast } from "../utils/ToastUtil";
 
 interface MealContextProps {
   mealList: Meal[];
   selectedDate: string;
+  rows: Row[];
+  selectedMealNumber: number;
+  selectedMealNumsConsumedTime: string;
   formattedMeals: Meal[][];
   totalResultPage: number;
   currentResultPage: number;
   resultPage: Food[];
+  setRows: React.Dispatch<React.SetStateAction<Row[]>>;
+  setSelectedMealNumber: React.Dispatch<React.SetStateAction<number>>;
+  setSelectedMealNumsConsumedTime: React.Dispatch<React.SetStateAction<string>>;
+  addFoodToMeal: (foodId: number, foodName: string) => void;
   handleSeach: (keyword: string, page: number) => void;
   handleChangeCurrentPage: (page: number) => void;
   getDailyMealhistoryList: (date: string) => void;
   createMealhistories: (mealhistories: MealRequestProps[]) => void;
   handleCalenderClick: (date: Date) => void;
+}
+
+export interface Row {
+  id?: number;
+  foodId: number;
+  foodName: string;
+  quantity: string;
+  deleteFlg: boolean;
 }
 
 const MealContext = createContext<MealContextProps | null>(null);
@@ -40,6 +57,10 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
   const [mealList, setMealList] = useState<Meal[]>([]);
   const [formattedMeals, setFormattedMeals] = useState<Meal[][]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(getToday);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [selectedMealNumber, setSelectedMealNumber] = useState<number>(0);
+  const [selectedMealNumsConsumedTime, setSelectedMealNumsConsumedTime] =
+    useState<string>("");
 
   const getDailyMealhistoryList = async (date: string) => {
     try {
@@ -48,25 +69,50 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
     } catch (e) {
       console.log(e);
       setMealList([]);
+      showToast("error", "failed to get mealhitories");
     }
   };
 
   const createMealhistories = async (mealhistories: MealRequestProps[]) => {
     try {
       const createdMeals = await createMealhistoriesService(mealhistories);
-      // if (
-      //   formatDateTimeToDateString(createdMeals[0].consumedAt) == selectedDate
-      // ) {
-      //   setMealList((prevMealList) => [...prevMealList, ...createdMeals]);
-      // }
       console.log("Meals successfully created:", createdMeals);
+      if (createdMeals) {
+        getDailyMealhistoryList(
+          formatDateTimeStringToDateString(createdMeals[0].consumedAt)
+        );
+      }
+      setSelectedMealNumsConsumedTime("");
+      showToast("success", "New mealhistory is successfully saved");
     } catch (e) {
+      showToast("error", "failed to create mealhitories");
       console.log(e);
+    }
+  };
+
+  const addFoodToMeal = (foodId: number, foodName: string) => {
+    if (rows.some((food) => food.foodId === foodId)) {
+      console.log("すでに登録済みです。");
+      return;
+    } else {
+      console.log("登録されていないです。");
+      console.log(foodId);
+    }
+    if (rows.length != 0) {
+      setRows((prevRows) => [
+        ...prevRows,
+        { foodId, foodName, quantity: "", deleteFlg: false },
+      ]);
+    } else {
+      setRows([{ foodId, foodName, quantity: "", deleteFlg: false }]);
+      setSelectedMealNumsConsumedTime("");
     }
   };
 
   const handleCalenderClick = (date: Date) => {
     setSelectedDate(formatDate(date));
+    setRows([]);
+    setSelectedMealNumber(0);
   };
 
   const [totalResultPage, setTotalResultPage] = useState<number>(0);
@@ -93,6 +139,7 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
     getDailyMealhistoryList(selectedDate);
   }, [selectedDate]);
 
+  // 選択した日にちの食事を～食目ごとに成型する
   useEffect(() => {
     const nMap = new Map<number, Meal[]>();
 
@@ -104,8 +151,11 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
 
+    console.log(nMap);
+
     const formatedMeals = Array.from(nMap.values());
     setFormattedMeals(formatedMeals);
+    setSelectedMealNumber(formatedMeals.length + 1);
   }, [mealList]);
 
   console.log(formattedMeals);
@@ -115,10 +165,17 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         mealList,
         selectedDate,
+        rows,
+        selectedMealNumber,
+        selectedMealNumsConsumedTime,
         formattedMeals,
         totalResultPage,
         currentResultPage,
         resultPage,
+        setRows,
+        setSelectedMealNumber,
+        setSelectedMealNumsConsumedTime,
+        addFoodToMeal,
         handleSeach,
         handleChangeCurrentPage,
         getDailyMealhistoryList,

@@ -3,10 +3,9 @@ import Calendar from "react-calendar";
 import "../../CustomCalender.css";
 import "react-calendar/dist/Calendar.css";
 import { useMeal } from "../../context/MealContext";
-import { formatDate } from "../../utils/DateUtil";
 
 const CalenderComponent = () => {
-  const { selectedDate, handleCalenderClick } = useMeal();
+  const { handleCalenderClick } = useMeal();
 
   return (
     <div className="w-full">

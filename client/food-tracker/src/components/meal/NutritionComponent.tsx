@@ -1,11 +1,19 @@
 import { Divider } from "@blueprintjs/core";
 import React from "react";
 import RatioComponent from "./RatioComponent";
+import { useReport } from "../../context/ReportContext";
+import { useMeal } from "../../context/MealContext";
+import { formatDateTimeStringToDateString } from "../../utils/DateUtil";
 
 const NutritionComponent = () => {
+  const { getDailyReport } = useReport();
+  const { selectedDate } = useMeal();
+  const handleRefreshButtonClick = () => {
+    getDailyReport(formatDateTimeStringToDateString(selectedDate));
+  };
   return (
     <>
-      <h1>栄養</h1>
+      <p onClick={handleRefreshButtonClick}>refresh</p>
       <div className="grid grid-cols-3 gap-6">
         {/* ratio */}
         <div className="">

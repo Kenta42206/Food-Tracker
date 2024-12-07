@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
-
 import { useMeal } from "../../context/MealContext";
-import { Pagination } from "flowbite-react";
-import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { Button } from "@blueprintjs/core";
+import { Pagination, Table } from "flowbite-react";
 
 export const FoodSearchComponent = () => {
   const {
     totalResultPage,
-    currentResultPage,
+
     resultPage,
+    addFoodToMeal,
     handleChangeCurrentPage,
     handleSeach,
   } = useMeal();
@@ -46,13 +44,39 @@ export const FoodSearchComponent = () => {
         <button onClick={handleSearchButtonClick}>Search</button>
       </div>
 
-      <div>
-        {resultPage.map((food) => (
-          <div>
-            <p>{food.id}</p>
-            <p>{food.name}</p>
-          </div>
-        ))}
+      <div className="mt-3">
+        <Table hoverable>
+          <Table.Head>
+            <Table.HeadCell>Name</Table.HeadCell>
+            <Table.HeadCell>P</Table.HeadCell>
+            <Table.HeadCell>F</Table.HeadCell>
+            <Table.HeadCell>C</Table.HeadCell>
+            <Table.HeadCell>
+              <span className="sr-only">Edit</span>
+            </Table.HeadCell>
+          </Table.Head>
+
+          {resultPage.map((food) => (
+            <Table.Body className="divide-y">
+              <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                  {food.name}
+                </Table.Cell>
+                <Table.Cell>{food.protein}</Table.Cell>
+                <Table.Cell>{food.fat}</Table.Cell>
+                <Table.Cell>{food.carbs}</Table.Cell>
+                <Table.Cell>
+                  <p
+                    onClick={() => addFoodToMeal(food.id, food.name)}
+                    className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
+                  >
+                    Add
+                  </p>
+                </Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          ))}
+        </Table>
       </div>
 
       <div className="flex overflow-x-auto sm:justify-center">
@@ -60,7 +84,7 @@ export const FoodSearchComponent = () => {
           currentPage={currentActivePage}
           totalPages={totalResultPage}
           onPageChange={onPageChange}
-          className="flex"
+          showIcons
         />
       </div>
     </div>

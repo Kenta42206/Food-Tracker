@@ -34,9 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const signup = async (username: string, password: string, email: string) => {
     try {
       const data = await signupService(username, password, email);
-      localStorage.setItem("token", data.token);
-      setLoginUser(data.user);
-      setIsAuthenticated(true);
+      await login(username, password);
     } catch (err) {
       console.log(err);
       setLoginUser(null);

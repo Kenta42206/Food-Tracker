@@ -6,11 +6,14 @@ export interface Meal {
   quantity: number;
   mealNumber: number;
   consumedAt: string;
+  deleteFlg: boolean;
 }
 
 export interface MealRequestProps {
-  food: Food;
-  quantity: number;
+  id?: number;
+  foodId: number;
   mealNumber: number;
+  quantity: number;
   consumedAt: string;
+  deleteFlg: boolean;
 }

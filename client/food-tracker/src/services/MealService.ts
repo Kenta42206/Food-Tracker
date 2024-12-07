@@ -18,15 +18,12 @@ export const createMealhistoriesService = async (
   mealhistories: MealRequestProps[]
 ) => {
   const token = localStorage.getItem("token");
-  const url = API_URL + "/batch";
-  const res = await axios.post(
-    url,
-    { mealhistories },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const url = API_URL + "batch";
+  const res = await axios.post(url, mealhistories, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
   return res.data as Meal[];
 };

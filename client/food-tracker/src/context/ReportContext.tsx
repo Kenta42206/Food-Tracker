@@ -1,13 +1,41 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
+import { getDailyReportService } from "../services/ReportService";
 
-interface ReportContextProps {}
+interface ReportContextProps {
+  totalNut: { [key: string]: number };
+  getDailyReport: (date: string) => void;
+}
 
 const ReportContext = createContext<ReportContextProps | null>(null);
 
-export const MealProvider: React.FC<{ children: ReactNode }> = ({
+export const ReportProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  return <ReportContext.Provider value={{}}>{children}</ReportContext.Provider>;
+  const [totalNut, setTotalNut] = useState<{ [key: string]: number }>({
+    Protein: 0,
+    Carbs: 0,
+    Fat: 0,
+  });
+
+  const getDailyReport = async (date: string) => {
+    try {
+      const report = await getDailyReportService(date);
+      setTotalNut({
+        ...totalNut,
+        Protein: report.totalProtein,
+        Carbs: report.totalCarbs,
+        Fat: report.totalFat,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  return (
+    <ReportContext.Provider value={{ totalNut, getDailyReport }}>
+      {children}
+    </ReportContext.Provider>
+  );
 };
 
 export const useReport = (): ReportContextProps => {
