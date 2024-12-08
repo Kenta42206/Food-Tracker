@@ -1,5 +1,3 @@
-import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import "./index.css";
 import "./CustomCalender.css";
@@ -13,28 +11,22 @@ import Dashboard from "./components/layout/Dashboard";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { MealProvider } from "./context/MealContext";
-import { ReportProvider } from "./context/ReportContext";
 
 function App() {
   return (
     <AuthProvider>
       <MealProvider>
-        <ReportProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route
-                path="/"
-                element={<PrivateRoute element={<Dashboard />} />}
-              >
-                <Route path="reports" element={<ReportPage />} />
-                <Route path="meals" element={<MealPage />} />
-                <Route path="settings" element={<SettingPage />} />
-              </Route>
-            </Routes>
-          </Router>
-        </ReportProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/" element={<PrivateRoute element={<Dashboard />} />}>
+              <Route path="reports" element={<ReportPage />} />
+              <Route path="meals" element={<MealPage />} />
+              <Route path="settings" element={<SettingPage />} />
+            </Route>
+          </Routes>
+        </Router>
       </MealProvider>
     </AuthProvider>
   );

@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import { User } from "../types/User";
 import { loginService, signupService } from "../services/AuthService";
+import { showToast } from "../utils/ToastUtil";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -24,19 +25,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       localStorage.setItem("token", data.token);
       setLoginUser(data.user);
       setIsAuthenticated(true);
+      showToast("success", "ログインに成功しました。");
     } catch (err) {
-      console.log(err);
       setLoginUser(null);
       setIsAuthenticated(false);
+      showToast("error", `ログインに失敗しました。 ${err}`);
     }
   };
 
   const signup = async (username: string, password: string, email: string) => {
     try {
       const data = await signupService(username, password, email);
+      showToast("success", `${data.username}を登録しました。`);
       await login(username, password);
     } catch (err) {
-      console.log(err);
+      showToast("error", `サインアップに失敗しました。 ${err}`);
       setLoginUser(null);
       setIsAuthenticated(false);
     }
@@ -46,6 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem("token");
     setLoginUser(null);
     setIsAuthenticated(false);
+    showToast("success", "ログアウトしました。");
   };
 
   return (

@@ -13,12 +13,13 @@ import {
 import {
   formatDate,
   formatDateTimeStringToDateString,
-  formatDateTimeToDateString,
   getToday,
 } from "../utils/DateUtil";
 import { getFoodsByKeyword } from "../services/FoodService";
 import { Food } from "../types/Food";
 import { showToast } from "../utils/ToastUtil";
+import { useAuth } from "./AuthContext";
+import { getDailyReportService } from "../services/ReportService";
 
 interface MealContextProps {
   mealList: Meal[];
@@ -30,6 +31,8 @@ interface MealContextProps {
   totalResultPage: number;
   currentResultPage: number;
   resultPage: Food[];
+  totalNut: { [key: string]: number };
+  getDailyReport: (date: string) => void;
   setRows: React.Dispatch<React.SetStateAction<Row[]>>;
   setSelectedMealNumber: React.Dispatch<React.SetStateAction<number>>;
   setSelectedMealNumsConsumedTime: React.Dispatch<React.SetStateAction<string>>;
@@ -61,44 +64,42 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedMealNumber, setSelectedMealNumber] = useState<number>(0);
   const [selectedMealNumsConsumedTime, setSelectedMealNumsConsumedTime] =
     useState<string>("");
+  const { isAuthenticated } = useAuth();
 
   const getDailyMealhistoryList = async (date: string) => {
     try {
       const meals = await getDailyMealhistoryListService(date);
       setMealList(meals);
     } catch (e) {
-      console.log(e);
       setMealList([]);
-      showToast("error", "failed to get mealhitories");
+      showToast("error", `食事記録の取得に失敗しました。 ${e}`);
     }
   };
 
   const createMealhistories = async (mealhistories: MealRequestProps[]) => {
     try {
       const createdMeals = await createMealhistoriesService(mealhistories);
-      console.log("Meals successfully created:", createdMeals);
+
       if (createdMeals) {
         getDailyMealhistoryList(
           formatDateTimeStringToDateString(createdMeals[0].consumedAt)
         );
       }
       setSelectedMealNumsConsumedTime("");
-      showToast("success", "New mealhistory is successfully saved");
+      showToast("success", "食事記録を登録しました！");
     } catch (e) {
-      showToast("error", "failed to create mealhitories");
+      showToast("error", `食事記録の登録に失敗しました。 ${e}`);
       console.log(e);
     }
   };
 
   const addFoodToMeal = (foodId: number, foodName: string) => {
     if (rows.some((food) => food.foodId === foodId)) {
-      console.log("すでに登録済みです。");
+      showToast("error", "すでに登録済みです。");
       return;
-    } else {
-      console.log("登録されていないです。");
-      console.log(foodId);
     }
-    if (rows.length != 0) {
+
+    if (rows.length !== 0) {
       setRows((prevRows) => [
         ...prevRows,
         { foodId, foodName, quantity: "", deleteFlg: false },
@@ -113,6 +114,7 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
     setSelectedDate(formatDate(date));
     setRows([]);
     setSelectedMealNumber(0);
+    getDailyReport(formatDate(date));
   };
 
   const [totalResultPage, setTotalResultPage] = useState<number>(0);
@@ -123,11 +125,10 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const result = await getFoodsByKeyword(keyword, page);
       setCurrentResultPage(result.currentPage);
-      console.log(currentResultPage);
       setTotalResultPage(result.totalPages);
       setResultPage(result.foods);
     } catch (e) {
-      console.log(e);
+      showToast("error", `検索に失敗しました。 ${e}`);
     }
   };
 
@@ -135,9 +136,31 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
     setCurrentResultPage(page);
   };
 
+  const [totalNut, setTotalNut] = useState<{ [key: string]: number }>({
+    Protein: 0,
+    Carbs: 0,
+    Fat: 0,
+  });
+
+  const getDailyReport = async (date: string) => {
+    try {
+      const report = await getDailyReportService(date);
+      setTotalNut({
+        ...totalNut,
+        Protein: report.totalProtein,
+        Carbs: report.totalCarbs,
+        Fat: report.totalFat,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
-    getDailyMealhistoryList(selectedDate);
-  }, [selectedDate]);
+    if (isAuthenticated) {
+      getDailyMealhistoryList(selectedDate);
+    }
+  }, [isAuthenticated, selectedDate]);
 
   // 選択した日にちの食事を～食目ごとに成型する
   useEffect(() => {
@@ -151,14 +174,10 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
 
-    console.log(nMap);
-
     const formatedMeals = Array.from(nMap.values());
     setFormattedMeals(formatedMeals);
     setSelectedMealNumber(formatedMeals.length + 1);
   }, [mealList]);
-
-  console.log(formattedMeals);
 
   return (
     <MealContext.Provider
@@ -172,6 +191,8 @@ export const MealProvider: React.FC<{ children: ReactNode }> = ({
         totalResultPage,
         currentResultPage,
         resultPage,
+        totalNut,
+        getDailyReport,
         setRows,
         setSelectedMealNumber,
         setSelectedMealNumsConsumedTime,

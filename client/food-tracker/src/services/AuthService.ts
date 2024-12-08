@@ -1,4 +1,5 @@
 import axios from "axios";
+import { User } from "../types/User";
 
 const API_URL = process.env.REACT_APP_API_BASE_URL + "/auth";
 
@@ -19,5 +20,5 @@ export const signupService = async (
     password,
     email,
   });
-  return res.data;
+  return res.data as User;
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useReport } from "../../context/ReportContext";
+import { useMeal } from "../../context/MealContext";
 
 interface RatioComponentProps {
   nutritionName: string;
@@ -8,7 +8,7 @@ interface RatioComponentProps {
 
 const RatioComponent: React.FC<RatioComponentProps> = ({ nutritionName }) => {
   const { loginUser } = useAuth();
-  const { totalNut } = useReport();
+  const { totalNut } = useMeal();
 
   const colorMap: Record<string, string> = {
     Protein: "text-red-500 dark:text-red-400",

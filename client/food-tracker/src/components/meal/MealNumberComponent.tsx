@@ -8,7 +8,6 @@ const MealNumberComponent: React.FC = () => {
     setRows,
     setSelectedMealNumber,
     setSelectedMealNumsConsumedTime,
-    selectedMealNumsConsumedTime,
     formattedMeals,
     selectedDate,
   } = useMeal();
@@ -26,12 +25,6 @@ const MealNumberComponent: React.FC = () => {
     setSelectedMealNumber(mealGroup[0].mealNumber);
     setSelectedMealNumsConsumedTime(
       formatTimeToHoursMinutes(mealGroup[0].consumedAt)
-    );
-    console.log(
-      "numberC: consu " +
-        mealGroup[0].consumedAt +
-        " seke " +
-        selectedMealNumsConsumedTime
     );
   };
 

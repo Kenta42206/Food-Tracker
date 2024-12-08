@@ -1,19 +1,16 @@
-import { Divider } from "@blueprintjs/core";
-import React from "react";
 import RatioComponent from "./RatioComponent";
-import { useReport } from "../../context/ReportContext";
 import { useMeal } from "../../context/MealContext";
-import { formatDateTimeStringToDateString } from "../../utils/DateUtil";
 
 const NutritionComponent = () => {
-  const { getDailyReport } = useReport();
   const { selectedDate } = useMeal();
-  const handleRefreshButtonClick = () => {
-    getDailyReport(formatDateTimeStringToDateString(selectedDate));
-  };
+
   return (
-    <>
-      <p onClick={handleRefreshButtonClick}>refresh</p>
+    <div className="p-2">
+      <div>
+        <h2 className="text-xl font-semibold ml-1 mb-2">
+          {selectedDate} のPFC
+        </h2>
+      </div>
       <div className="grid grid-cols-3 gap-6">
         {/* ratio */}
         <div className="">
@@ -31,7 +28,7 @@ const NutritionComponent = () => {
         </div>
         {/* end ratio */}
       </div>
-    </>
+    </div>
   );
 };
 

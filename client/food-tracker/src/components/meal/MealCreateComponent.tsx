@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useMeal } from "../../context/MealContext";
 import { MealRequestProps } from "../../types/Meal";
 
@@ -51,12 +50,12 @@ const MealCreateComponent = () => {
     <div className=" p-2">
       <div>
         <h2 className="text-xl font-semibold ml-1 mb-2">
-          {selectedDate}: {selectedMealNumber != 0 ? selectedMealNumber : "-"}
+          {selectedDate}: {selectedMealNumber !== 0 ? selectedMealNumber : "-"}
           食目
         </h2>
       </div>
 
-      {rows.length == 0 ? (
+      {rows.length === 0 ? (
         <>
           <div>
             <p className="text-slate-500">
@@ -65,7 +64,7 @@ const MealCreateComponent = () => {
           </div>
         </>
       ) : (
-        <>
+        <form>
           <div>
             <h2 className="text-xl font-semibold ml-1 mb-2">
               食事時間:{" "}
@@ -130,7 +129,7 @@ const MealCreateComponent = () => {
               <button onClick={handleCreateButtonClick}>作成</button>
             </div>
           </div>
-        </>
+        </form>
       )}
     </div>
   );
