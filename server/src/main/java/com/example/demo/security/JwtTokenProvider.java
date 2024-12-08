@@ -27,11 +27,22 @@ public class JwtTokenProvider {
 	@Value("${security.jwt.token.secretkey}")
 	private String jwtSecretKey;
 
+	/**
+     * JWTの署名に使用するキーを取得する。
+     * 
+     * @return {@code Key} HMAC SHAの署名に使用するキー
+     */
 	private Key getSignWithKey(){
 		byte[] decodedKey = Decoders.BASE64.decode(jwtSecretKey);
 		return Keys.hmacShaKeyFor(decodedKey);
 	}
 
+	/**
+     * JWTトークンからユーザー名を取得する。
+     * 
+     * @param token JWTトークン
+     * @return {@code String} JWTトークンに含まれるユーザー名（サブジェクト）
+     */
 	public String getUsernameFromJwt(String token){
 		return Jwts.parserBuilder()
 				.setSigningKey(getSignWithKey())
@@ -41,10 +52,23 @@ public class JwtTokenProvider {
 				.getSubject();
 	}
 
+	/**
+     * JWTの有効期限（ミリ秒）を取得する。
+     * 
+     * @return {@code long} JWTの有効期限（ミリ秒）
+     */
 	public long getExpirationMs(){
 		return jwtExpirationMs;
 	}
 
+	/**
+     * JWTトークンを検証する。
+     * トークンが無効または期限切れの場合、例外がスローされる。
+     * 
+     * @param token JWTトークン
+     * @return {@code boolean} トークンが有効な場合はtrue、無効な場合はfalse
+     * @throws CustomException JWTトークンが無効または期限切れの場合
+     */
 	public boolean validateToken(String token){
 		try {
 			// parseClaimsJws(token)でtokenを検証してくれる。
@@ -56,11 +80,12 @@ public class JwtTokenProvider {
 		}
 	}
 
-	// Tokenのリクエストは以下のように設定するのが一般的とのこと。
-	// 
-	//   Authorization: Bearer ~
-	// 
-	// ヘッダ情報などを取り除いたものを取得するメソッド
+	/**
+     * リクエストヘッダからJWTトークンを取得する。
+     * 
+     * @param req HTTPリクエスト
+     * @return {@code String} リクエストから取得したJWTトークン、存在しない場合はnull
+     */
 	public String getJwtFromReuest(HttpServletRequest req){
 		String bearerToken = req.getHeader("Authorization");
 		// Tokenがnullでなく、"Bearer"から始まっていれば"Bearer "を取り除く
@@ -70,7 +95,12 @@ public class JwtTokenProvider {
 		return null;
 	}
 
-
+	/**
+     * 認証情報からJWTトークンを生成する。
+     * 
+     * @param authentication 認証情報
+     * @return {@code String} 生成されたJWTトークン
+     */
 	public String generateToken(Authentication authentication){
 		// 認証情報からusernameを取ってくる
 		String username = authentication.getName();

@@ -30,10 +30,23 @@ public class MealhistoryService {
     @Autowired
     FoodRepository foodRepository;
 
+    /**
+     * 指定した日付に基づいて、ユーザーの食事履歴を取得する。
+     * 
+     * @param consumedAt 食事を摂取した日付
+     * @return {@code List<Mealhistory>} ユーザーの食事履歴リスト
+     */
     public List<Mealhistory> getMealhistoriesbyUserIdAndDate(LocalDate consumedAt){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
+        Object principal = authentication.getPrincipal();
+
+        Long userId;
+
+        if (principal instanceof User user) { 
+            userId = user.getId();
+        } else {
+            throw new IllegalStateException("User details are not of expected type.");
+        }
 
         LocalDateTime startOfDay = consumedAt.atStartOfDay();
         LocalDateTime endOfDay = consumedAt.atTime(LocalTime.MAX);
@@ -41,10 +54,24 @@ public class MealhistoryService {
         return mealhistoryList;
     }
 
+    /**
+     * 新しい食事履歴を作成する。
+     * 
+     * @param mealhistory 新しい食事履歴の情報を持つ {@code MealhistoryRequestDto}
+     * @return {@code Mealhistory} 作成された食事履歴
+     * @throws ResourceNotFoundException 食品IDに該当する食品が見つからなかった場合
+     */
     public Mealhistory createMealhistory(MealhistoryRequestDto mealhistory){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
+        Object principal = authentication.getPrincipal();
+
+        Long userId;
+
+        if (principal instanceof User user) { 
+            userId = user.getId();
+        } else {
+            throw new IllegalStateException("User details are not of expected type.");
+        }
 
 
         Long foodId = mealhistory.getFoodId();
@@ -56,11 +83,26 @@ public class MealhistoryService {
         return newMealhistory;
     }
 
+    /**
+     * 複数の食事履歴を一括で作成・更新する。
+     * もし食事履歴のIDが指定されていれば既存の食事履歴を更新し、指定されていなければ新たに作成する。
+     * 
+     * @param mealhistories 複数の食事履歴情報を持つ {@code List<MealhistoryRequestDto>}
+     * @return {@code List<Mealhistory>} 作成または更新された食事履歴リスト
+     * @throws ResourceNotFoundException 食品IDに該当する食品が見つからなかった場合
+     */
     @Transactional
     public List<Mealhistory> createMealhistories(List<MealhistoryRequestDto> mealhistories){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
+        Object principal = authentication.getPrincipal();
+
+        Long userId;
+
+        if (principal instanceof User user) { 
+            userId = user.getId();
+        } else {
+            throw new IllegalStateException("User details are not of expected type.");
+        }
 
         List<Mealhistory> mealhistoriesToSave = mealhistories.stream()
         .map(mealhistory -> {
@@ -92,6 +134,14 @@ public class MealhistoryService {
         return mealhistoryRepository.saveAll(mealhistoriesToSave);
     }
 
+    /**
+     * 既存の食事履歴を更新する。
+     * 
+     * @param id 更新対象の食事履歴のID
+     * @param mealhistooryRequestDto 更新するための新しい情報を持つ {@code MealhistoryRequestDto}
+     * @return {@code Mealhistory} 更新された食事履歴
+     * @throws ResourceNotFoundException 食事履歴IDまたは食品IDに該当するレコードが見つからなかった場合
+     */
     public Mealhistory updateMealhistory(Long id, MealhistoryRequestDto mealhistooryRequestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
@@ -115,12 +165,25 @@ public class MealhistoryService {
         return mealhistoryRepository.save(targetMealhistory);
     }
 
+    /**
+     * 指定した食事履歴を削除する。
+     * 
+     * @param id 削除する食事履歴のID
+     * @throws ResourceNotFoundException 食事履歴IDに該当するレコードが見つからなかった場合
+     */
     public void deleteMealhistory(Long id) {
         if (mealhistoryRepository.existsById(id)) {
             mealhistoryRepository.deleteById(id);
         } else {
             throw new ResourceNotFoundException("Mealhistory not found with id {" + id + "}");
         }
+    }
+
+    /**
+     * deleteFlgが立っている食事履歴を一括削除する。
+     */
+    public void deleteMealhistoriesWithDeleteFlg(){
+        mealhistoryRepository.deleteMealhistoriesWithDeleteFlg();
     }
     
 }

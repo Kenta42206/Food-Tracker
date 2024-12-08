@@ -65,7 +65,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	    }
 	}
 
-	// エラーレスポンスを処理するメソッド
+	/**
+	 * エラーレスポンスを処理し、指定されたステータスコードとメッセージをクライアントに返す。
+	 * レスポンスのステータスコードを設定し、コンテンツタイプをプレーンテキストに設定した後、
+	 * エラーメッセージをレスポンスボディに書き込む。(認証フィルター内のみで使用)
+	 *
+	 * @param response HTTPレスポンスオブジェクト
+	 * @param status レスポンスのステータスコード
+	 * @param message エラーメッセージ
+	 * @throws IOException レスポンス書き込み中に発生した入出力例外
+	 */
 	private void handleErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
 	    // レスポンスのステータスコードを設定
 	    response.setStatus(status);

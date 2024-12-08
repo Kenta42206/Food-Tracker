@@ -35,6 +35,15 @@ public class AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * ユーザー登録処理を行う。
+     * 指定されたユーザー名とメールアドレスが既に存在する場合、例外がスローされる。
+     * ユーザー名とメールアドレスが重複しない場合、新しいユーザーを作成して保存する。
+     * 
+     * @param signupRequestDto ユーザー登録に必要な情報を含むDTO
+     * @return {@code User} 登録されたユーザー情報
+     * @throws CustomException ユーザー名またはメールアドレスが既に使用されている場合
+     */
     public User signup(SignupRequestDto signupRequestDto){
         String username = signupRequestDto.getUsername();
         String email = signupRequestDto.getEmail();
@@ -55,6 +64,14 @@ public class AuthService {
         return userRepository.save(user);
     }
 
+    /**
+     * ユーザー認証を行い、JWTトークンを発行する。
+     * 認証情報が無効な場合、認証エラーがスローされる。
+     * 
+     * @param loginRequestDto ログインに必要なユーザー名とパスワードを含むDTO
+     * @return {@code JwtResponseDto} 発行されたJWTトークンとユーザー情報
+     * @throws CustomException 認証エラー（ユーザー名またはパスワードが無効な場合）
+     */
     public JwtResponseDto authenticateUser(LoginRequestDto loginRequestDto){
         try {
             Authentication auth = authenticationManager.authenticate(

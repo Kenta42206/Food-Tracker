@@ -25,6 +25,14 @@ public class ReportService {
     @Autowired
     MealhistoryRepository mealhistoryRepository;
 
+    /**
+     * ユーザーIDと日付をもとに、その日のレポートを取得する。
+     * レポートが存在しない場合は新規作成し、存在する場合は合計値を再計算して返す。
+     *
+     * @param reportDate レポートの日付
+     * @return {@code Report} 該当日のレポート
+     * @throws ResourceNotFoundException レポートが見つからない場合
+     */
     public Report getDailyReportByUserIdAndDate(LocalDate reportDate){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
@@ -52,7 +60,14 @@ public class ReportService {
         }
     }
 
-    public Report calculateDailyReport(Report report){
+    /**
+     * 選択した日のMealhistoryデータから、合計のプロテイン、脂肪、炭水化物、カロリーを計算する。
+     * レポートの日付に関連するMealhistoryを取得し、そのデータをもとに各栄養素の合計を計算して、レポートにセットする。
+     *
+     * @param report 計算対象のレポート
+     * @return {@code Report} 栄養素の合計値をセットしたレポート
+     */
+    private Report calculateDailyReport(Report report){
         Long userId = report.getUserId();
 
         LocalDateTime startOfDay = report.getReportDate().atStartOfDay();
@@ -71,7 +86,6 @@ public class ReportService {
         for(Mealhistory mealhistory:mealHistories){
             totalCalories += mealhistory.getQuantity() * (mealhistory.getFood().getCalories() /100);
             totalProtein += mealhistory.getQuantity() * (mealhistory.getFood().getProtein() / 100);
-            // (meal.food.protein * (meal.quantity / 100) * 10) / 10
             totalCarbs += mealhistory.getQuantity() * (mealhistory.getFood().getCarbs() /100);
             totalFat += mealhistory.getQuantity() * (mealhistory.getFood().getFat() / 100);
         }

@@ -11,13 +11,13 @@ import lombok.Setter;
 @Setter
 public class MealhistoryRequestDto {
     private Long id;
-    @NotNull
+    @NotNull(message="Foodは必須項目です。")
     private Long foodId;
-    @NotNull
+    @NotNull(message="食事回数は必須項目です。")
     private int mealNumber;
-    @NotNull
+    @NotNull(message="量は必須項目です。")
     private int quantity;
-    @NotBlank
+    @NotBlank(message="食事時間は必須項目です。")
     private LocalDateTime consumedAt;
     private boolean deleteFlg;
 }
