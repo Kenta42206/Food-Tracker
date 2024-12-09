@@ -14,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -46,6 +47,14 @@ public class User implements UserDetails {
 
     @Column(name="goal_calories")
     private int goalCalories;
+
+    @PrePersist
+    public void prePersist() {
+        this.goalCalories = 2000;
+        this.goalProtein = 75;
+        this.goalFat = 65;
+        this.goalCarbs = 280;
+    }
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

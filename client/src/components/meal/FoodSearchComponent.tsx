@@ -60,7 +60,9 @@ export const FoodSearchComponent = () => {
             <Table.Body className="divide-y">
               <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                  {food.name}
+                  {food.name.length > 13
+                    ? food.name.substring(0, 12) + "..."
+                    : food.name}
                 </Table.Cell>
                 <Table.Cell>{food.protein}</Table.Cell>
                 <Table.Cell>{food.fat}</Table.Cell>

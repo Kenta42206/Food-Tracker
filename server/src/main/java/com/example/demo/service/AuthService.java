@@ -60,6 +60,8 @@ public class AuthService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(hashedPassword);
+        // 目標摂取栄養素の初期値として、一般平均の（P:75　F:64.4　C:280）を設定する。
+        
 
         return userRepository.save(user);
     }

@@ -8,11 +8,16 @@ spring:
     enabled: true
     baseline-version: 0
     baseline-on-migrate: true
-    locations: classpath:db/migration
+    locations: classpath:db/migrations
   jpa:
     hibernate:
       ddl-auto: none
     open-in-view: false
+
+logging:
+  level:
+    db:
+      migration: DEBUG
 
 security:
   jwt:

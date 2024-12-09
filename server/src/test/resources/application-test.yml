@@ -1,6 +1,9 @@
 spring:
+  config:
+    activate:
+      on-profile: test
   datasource:
-    url: jdbc:postgresql://localhost:5432/test2
+    url: jdbc:postgresql://localhost:5432/test
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver

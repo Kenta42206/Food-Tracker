@@ -33,12 +33,6 @@ public class MealhistoryController {
         return new ResponseEntity<>(mealhistories, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<Mealhistory> createMealhistory(@RequestBody MealhistoryRequestDto mealhistooryRequestDto) {
-        Mealhistory newMealhistory = mealhistoryService.createMealhistory(mealhistooryRequestDto);
-        return new ResponseEntity<>(newMealhistory, HttpStatus.CREATED);
-    }
-
     @PostMapping("/batch")
     public ResponseEntity<List<Mealhistory>> createMealhistories(@RequestBody List<MealhistoryRequestDto> mealhistoryRequestDto) {
         List<Mealhistory> savedHistories = mealhistoryService.createMealhistories(mealhistoryRequestDto);

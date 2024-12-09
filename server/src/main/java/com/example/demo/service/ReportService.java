@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Mealhistory;
@@ -16,6 +17,7 @@ import com.example.demo.entity.User;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.MealhistoryRepository;
 import com.example.demo.repository.ReportRepository;
+import com.example.demo.repository.UserRepository;
 
 @Service
 public class ReportService {
@@ -24,6 +26,9 @@ public class ReportService {
 
     @Autowired
     MealhistoryRepository mealhistoryRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     /**
      * ユーザーIDと日付をもとに、その日のレポートを取得する。
@@ -34,9 +39,7 @@ public class ReportService {
      * @throws ResourceNotFoundException レポートが見つからない場合
      */
     public Report getDailyReportByUserIdAndDate(LocalDate reportDate){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
+        Long userId = getUserIdFromPrincipal();
 
         if(!reportRepository.existsByUserIdAndReportDate(userId,reportDate)){
             return reportRepository.findByUserIdAndDate(userId, reportDate).orElseGet(()->{
@@ -96,5 +99,18 @@ public class ReportService {
         report.setTotalFat(totalFat);
 
         return report;
+    }
+
+    private Long getUserIdFromPrincipal(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) { 
+            User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new ResourceNotFoundException("User '" + userDetails.getUsername() + "' not found"));
+            return user.getId();
+        } else {
+            throw new IllegalStateException("User details are not of expected type.");
+        }
     }
 }

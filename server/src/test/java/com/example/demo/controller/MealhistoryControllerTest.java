@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class MealhistoryControllerTest {
     
     @Autowired
@@ -44,27 +46,12 @@ public class MealhistoryControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser")
-    public void testCreateMealHistory() throws Exception{
-        String requestJson = "{\"foodId\":1, \"quantity\":200}";
-
-        ResultActions result = mockMvc.perform(post("/api/v1/mealhistory")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson));
-
-                result.andExpect(status().isCreated())
-                .andExpect(jsonPath("$.food.id").value(1L))
-                .andExpect(jsonPath("$.food.name").value("Rice"))
-                .andExpect(jsonPath("$.quantity").value(250));
-    }
-
-    @Test
     @WithMockUser(username = "testUser") 
     public void testBatchCreateMealhistories() throws Exception {
         String requestJson = """
             [
-                {"foodId": 1, "quantity": 150},
-                {"foodId": 2, "quantity": 300}
+                {"foodId": 1, "quantity": 150, "consumedAt": "2000-01-02T08:00:00", "mealNumber": 1},
+                {"foodId": 2, "quantity": 300, "consumedAt": "2000-01-02T12:00:00", "mealNumber": 2}
             ]
         """;
 
@@ -73,11 +60,15 @@ public class MealhistoryControllerTest {
                 .content(requestJson));
 
         result.andExpect(status().isCreated())
-              .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-              .andExpect(jsonPath("$[0].food.id").value(1))
-              .andExpect(jsonPath("$[0].quantity").value(150))
-              .andExpect(jsonPath("$[1].food.id").value(2))
-              .andExpect(jsonPath("$[1].quantity").value(300));
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$[0].food.id").value(1))
+            .andExpect(jsonPath("$[0].quantity").value(150))
+            .andExpect(jsonPath("$[0].consumedAt").value("2000-01-02T08:00:00")) 
+            .andExpect(jsonPath("$[0].mealNumber").value(1)) 
+            .andExpect(jsonPath("$[1].food.id").value(2))
+            .andExpect(jsonPath("$[1].quantity").value(300))
+            .andExpect(jsonPath("$[1].consumedAt").value("2000-01-02T12:00:00")) 
+            .andExpect(jsonPath("$[1].mealNumber").value(2)); 
     }
 
     

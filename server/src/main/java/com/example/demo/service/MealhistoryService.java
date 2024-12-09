@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.MealhistoryRequestDto;
@@ -19,6 +20,7 @@ import com.example.demo.entity.User;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.FoodRepository;
 import com.example.demo.repository.MealhistoryRepository;
+import com.example.demo.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -30,6 +32,9 @@ public class MealhistoryService {
     @Autowired
     FoodRepository foodRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     /**
      * 指定した日付に基づいて、ユーザーの食事履歴を取得する。
      * 
@@ -37,16 +42,7 @@ public class MealhistoryService {
      * @return {@code List<Mealhistory>} ユーザーの食事履歴リスト
      */
     public List<Mealhistory> getMealhistoriesbyUserIdAndDate(LocalDate consumedAt){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Long userId;
-
-        if (principal instanceof User user) { 
-            userId = user.getId();
-        } else {
-            throw new IllegalStateException("User details are not of expected type.");
-        }
+        Long userId = getUserIdFromPrincipal();
 
         LocalDateTime startOfDay = consumedAt.atStartOfDay();
         LocalDateTime endOfDay = consumedAt.atTime(LocalTime.MAX);
@@ -62,16 +58,7 @@ public class MealhistoryService {
      * @throws ResourceNotFoundException 食品IDに該当する食品が見つからなかった場合
      */
     public Mealhistory createMealhistory(MealhistoryRequestDto mealhistory){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Long userId;
-
-        if (principal instanceof User user) { 
-            userId = user.getId();
-        } else {
-            throw new IllegalStateException("User details are not of expected type.");
-        }
+        Long userId = getUserIdFromPrincipal();
 
 
         Long foodId = mealhistory.getFoodId();
@@ -93,16 +80,7 @@ public class MealhistoryService {
      */
     @Transactional
     public List<Mealhistory> createMealhistories(List<MealhistoryRequestDto> mealhistories){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Long userId;
-
-        if (principal instanceof User user) { 
-            userId = user.getId();
-        } else {
-            throw new IllegalStateException("User details are not of expected type.");
-        }
+        Long userId = getUserIdFromPrincipal();
 
         List<Mealhistory> mealhistoriesToSave = mealhistories.stream()
         .map(mealhistory -> {
@@ -143,9 +121,7 @@ public class MealhistoryService {
      * @throws ResourceNotFoundException 食事履歴IDまたは食品IDに該当するレコードが見つからなかった場合
      */
     public Mealhistory updateMealhistory(Long id, MealhistoryRequestDto mealhistooryRequestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Long userId = user.getId();
+        Long userId = getUserIdFromPrincipal();
 
         Mealhistory targetMealhistory = mealhistoryRepository.findById(id).orElseThrow(()->{
             throw new ResourceNotFoundException("Mealhistory not found with id {" + id + "}");
@@ -184,6 +160,19 @@ public class MealhistoryService {
      */
     public void deleteMealhistoriesWithDeleteFlg(){
         mealhistoryRepository.deleteMealhistoriesWithDeleteFlg();
+    }
+
+    private Long getUserIdFromPrincipal(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) { 
+            User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new ResourceNotFoundException("User '" + userDetails.getUsername() + "' not found"));
+            return user.getId();
+        } else {
+            throw new IllegalStateException("User details are not of expected type.");
+        }
     }
     
 }
